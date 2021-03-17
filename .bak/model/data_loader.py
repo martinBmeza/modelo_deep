@@ -1,11 +1,11 @@
 """Alimentar con datos al bucle de entrenamiento"""
-import keras
+import keras 
 import numpy as np
 import os
-MAIN_PATH = '/home/martin/Documents/modelo_deep'
+MAIN_PATH = '/home/mrtn/Documents/TESIS/de-reverb/Source/MODELOS/modelo_prueba'
 
 class DataGenerator(keras.utils.Sequence):
-
+    
     'Generates data for Keras'
     def __init__(self, list_IDs, path, labels = None, batch_size=32, dim=(513,33), n_channels=1, n_classes=None, shuffle=True):
         'Initialization'
@@ -20,9 +20,7 @@ class DataGenerator(keras.utils.Sequence):
         self.on_epoch_end()
 
     def __len__(self):
-        '''Indica el numero de baches por epoca. Esta definido como
-        la cantidad de elementos con distintos IDs dividido el tamaño de baches buscado.
-        Este valor se redondea para obtener numeros enteros.'''
+        'Denotes the number of batches per epoch'
         return int(np.floor(len(self.list_IDs) / self.batch_size))
 
     def __getitem__(self, index):
