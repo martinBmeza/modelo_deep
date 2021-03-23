@@ -7,17 +7,26 @@ y señales senoidales con ruido agregado. Cada tipo de señal se guarda luego en
 import numpy as np
 import matplotlib.pyplot as plt
 import soundfile as sf
-import sys
+import os, sys
 
 #Parametros de Generacion
 cantidad = 1000
 duracion = 1
 fs=16000
 
+def safe_dir(path):
+        if os.path.exists(path):
+            print('Guarda: el directorio ya existia, puede contener informacion preexistente')
+            return path
+        else:
+            os.mkdir(path)
+            return path
+
+
 def generar_seno(frecuencia, duracion, fs, amplitud=0.7):
     """Generacion de señales senoidales. Duracion en segundos, frecuencia en Hz
     """
-    tiempo = np.linspace(0,1,(fs*1)+1)
+    tiempo = np.linspace(0,1,(fs*1))
     seno = amplitud*np.sin(2*np.pi*frecuencia*tiempo)
     return seno
 
@@ -28,8 +37,12 @@ def generar_seno(frecuencia, duracion, fs, amplitud=0.7):
 #sf.write("prueba.wav", generar_seno(440), 16000)
 
 clean = [generar_seno(i, duracion, fs) for i in np.random.uniform(200, 2000, size=(cantidad,))]
-noisy = [(clean[j]+np.random.uniform(-0.3, 0.3, size=(duracion*fs+1,))) for j in range(len(clean)) ]
+noisy = [(clean[j]+np.random.uniform(-0.3, 0.3, size=(duracion*fs,))) for j in range(len(clean)) ]
 
+
+
+safe_dir('clean')
+safe_dir('noisy')
 
 
 if len(clean)==len(noisy):
@@ -41,13 +54,4 @@ for i in range(cantidad):
     nombre_noisy = "noisy/senoidal_"+str(i)+".flac"
     sf.write(nombre_clean, clean[i], fs)
     sf.write(nombre_noisy, noisy[i], fs)
-
-#print("largo de clean: "+str(len(clean)))
-#print("largo de noisy: "+str(len(noisy)))
-
-#
-#plt.plot(clean[0][:4000])
-#plt.plot(noisy[0][:4000])
-#plt.show()
-
 
