@@ -5,10 +5,10 @@ import os
 MAIN_PATH = '/home/martin/Documents/modelo_deep'
 
 class DataGenerator(keras.utils.Sequence):
+    '''Generates data for Keras'''
 
-    'Generates data for Keras'
     def __init__(self, list_IDs, path, labels = None, batch_size=32, dim=(513,33), n_channels=1, n_classes=None, shuffle=True):
-        'Initialization'
+        '''Initialization'''
         self.dim = dim
         self.batch_size = batch_size
         self.labels = labels
@@ -26,7 +26,8 @@ class DataGenerator(keras.utils.Sequence):
         return int(np.floor(len(self.list_IDs) / self.batch_size))
 
     def __getitem__(self, index):
-        'Generate one batch of data'
+        '''Genera un bacht de datos. Recibe los indices que tiene que seleccionar, y
+        devuelve los vectores que conforman el batch de datos'''
         # Generate indexes of the batch
         indexes = self.indexes[index*self.batch_size:(index+1)*self.batch_size]
 
@@ -39,17 +40,22 @@ class DataGenerator(keras.utils.Sequence):
         return X, y
 
     def on_epoch_end(self):
-        'Updates indexes after each epoch'
+        '''Actualiza los indices a utilizar luego de cada epoca.
+        Hace una selección random si shuffle==True. De lo contrario,
+        los indices se mantienen iguales y el orden de entrenamiento
+        es siempre el mismo'''
         self.indexes = np.arange(len(self.list_IDs))
         if self.shuffle == True:
             np.random.shuffle(self.indexes)
 
     def __data_generation(self, list_IDs_temp):
-        'Generates data containing batch_size samples'
+        '''Genera los datos para un bache en particular. De este metodo depende el
+        formato de salida de los tensores que forman el bache, como tambien la
+        ubicacion de los datos.Generates data containing batch_size samples'''
         # Initialization
         X = np.empty((self.batch_size, 2, 32000))
         Y = np.empty((self.batch_size, 32000))
-        path = os.path.join(MAIN_PATH, self.path,"")
+        path = os.path.join(MAIN_PATH, self.path,"") #No tiene sentido que esto se repita en cada epoca.
         # Generate data
         for i, ID in enumerate(list_IDs_temp):
             #Cargo los audios
@@ -57,4 +63,12 @@ class DataGenerator(keras.utils.Sequence):
             X[i,:] = x,y
             Y[i] = y
         return [X[:,0],X[:,1]], Y
-
+"""
+Explicación util: La clase DataGenerator es basicamente una extensión derivada
+de la clase keras.utils.sequence en la cual se trabaja con una secuencia de
+baches. Lo principal en esta clase son los métodos "magicos"(polemico)
+__getitem__ y __len__.El primero se encarga de definir la cantidad de baches
+que va a tener la secuencia, y el segundo recibe el numero de bache actual de
+la secuencia (del total de baches, entonces) y devuelve un bache. El resto de
+métodos son opcionales y se encuentran bien documentados.
+"""
