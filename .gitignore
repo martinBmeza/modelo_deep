@@ -7,3 +7,4 @@ data/noisy/*
 *.swp 
 *.swo
 *~
+.bak/
