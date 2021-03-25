@@ -2,7 +2,10 @@
 import keras
 import numpy as np
 import os
+import random
+import glob
 MAIN_PATH = '/home/martin/Documents/modelo_deep'
+
 
 class DataGenerator(keras.utils.Sequence):
     '''Generates data for Keras'''
@@ -53,16 +56,24 @@ class DataGenerator(keras.utils.Sequence):
         formato de salida de los tensores que forman el bache, como tambien la
         ubicacion de los datos.Generates data containing batch_size samples'''
         # Initialization
-        X = np.empty((self.batch_size, 2, 32000))
+
+        x_clean = np.empty((self.batch_size, 32000))
+        x_reverb = np.empty((self.batch_size, 32000))
         Y = np.empty((self.batch_size, 32000))
-        path = os.path.join(MAIN_PATH, self.path,"") #No tiene sentido que esto se repita en cada epoca.
+
         # Generate data
         for i, ID in enumerate(list_IDs_temp):
             #Cargo los audios
-            [x, y] = np.load(path + str(ID) + '.npy')
-            X[i,:] = x,y
-            Y[i] = y
-        return [X[:,0],X[:,1]], Y
+
+            [clean, reverb] = np.load(self.path + str(ID) + '.npy')
+            [clean, reverb] = np.load(self.path + str(ID) + '.npy')
+
+            x_clean[i] = clean
+            x_reverb[i] = reverb
+            Y[i] = reverb
+        return [x_clean, x_reverb], Y
+
+
 """
 Explicación util: La clase DataGenerator es basicamente una extensión derivada
 de la clase keras.utils.sequence en la cual se trabaja con una secuencia de
@@ -72,3 +83,38 @@ que va a tener la secuencia, y el segundo recibe el numero de bache actual de
 la secuencia (del total de baches, entonces) y devuelve un bache. El resto de
 métodos son opcionales y se encuentran bien documentados.
 """
+def build_generators(MAIN_PATH, params):
+    """
+    Crea instancias de la clase DataGenerator (para entrenamiento y valdiacion) a partir de un diccionario donde se determinan los parametros
+    del generador de datos, y el path principal.
+
+    PARAMETROS:
+        -MAIN_PATH (str) path principal de la carpeta de trabajo
+        -params (dict) diccionario con los campos 'dim'(int), 'batch_size'(int), 'shuffle'(bool) para configurar el generador de datos
+        -subpath (str) path de la carpeta dentro de data/ de donde tomar los datos. Por defecto esta asignada a 'data_ready' que es donde se encuentran
+        los datos procesados. Puede ser util cambiarla a la carpeta data_dummy para trabajar con los datos dummy en ocasiones de debuggeo
+
+    SALIDA:
+        -training_generator (DataGenerator) instancia de clase que contiene los datos para pasarse a una instancia de entrenamiento y proveer 
+            los datos de entrenamiento al modelo
+        -validation_generator (DataGenerator) instancia de clase que contiene los datos para pasarse a una instancia de entrenamiento y proveer 
+            los datos de validacion al modelo
+
+        """
+    audio_list = glob.glob(params['path']+'/**/*.npy', recursive=True) #PROVISORIO
+
+    #seleccion random de sets
+    audio_numbers = list(range(0, len(audio_list)))
+    random.shuffle(audio_numbers)
+    train_n = int(len(audio_numbers)*0.8) #porcentaje de entrenamiento - validacion
+    validation_n = len(audio_numbers) - train_n
+
+    partition = {'train' : audio_numbers[:train_n], 'validation' : audio_numbers[train_n:]}
+
+    # Generators
+    training_generator = DataGenerator(partition['train'],  **params)
+    validation_generator = DataGenerator(partition['validation'], **params)
+
+    print('Cantidad de datos para entrenamiento:', len(partition['train']))
+    print('Cantidad de datos para validacion:', len(partition['validation']))
+    return training_generator, validation_generator

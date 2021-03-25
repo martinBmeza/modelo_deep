@@ -11,7 +11,7 @@ import os, sys
 
 #Parametros de Generacion
 cantidad = 1000
-duracion = 1
+duracion = 2 #segundos
 fs=16000
 
 def safe_dir(path):
@@ -26,7 +26,7 @@ def safe_dir(path):
 def generar_seno(frecuencia, duracion, fs, amplitud=0.7):
     """Generacion de señales senoidales. Duracion en segundos, frecuencia en Hz
     """
-    tiempo = np.linspace(0,1,(fs*1))
+    tiempo = np.linspace(0, duracion ,(fs*duracion))
     seno = amplitud*np.sin(2*np.pi*frecuencia*tiempo)
     return seno
 
@@ -50,8 +50,5 @@ if len(clean)==len(noisy):
 else:
     raise Exception("ERROR: Las señales no se estan generando en igual cantidad")
 for i in range(cantidad):
-    nombre_clean = "clean/senoidal_"+str(i)+".flac"
-    nombre_noisy = "noisy/senoidal_"+str(i)+".flac"
-    sf.write(nombre_clean, clean[i], fs)
-    sf.write(nombre_noisy, noisy[i], fs)
-
+    filename = 'data_dummy/'+str(i)+'.npy'
+    np.save(filename, [clean[i], noisy[i]])

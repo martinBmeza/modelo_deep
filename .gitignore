@@ -1,3 +1,9 @@
 data/clean/*
 data/noisy/*
-
+**/*.npy
+**/*.pyc
+**/*.swp
+**/*.swo
+*.swp 
+*.swo
+*~
