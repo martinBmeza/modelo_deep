@@ -3,10 +3,9 @@ data/clean/*
 data/noisy/*
 
 # Python 
-**/*.npy
-**/*.pyc
-**/*.swp
-**/*.swo
+*.npy
+*.pyc
+*ipynbi_checkpoints
 
 # vim
 *.swp 
